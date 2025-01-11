@@ -79,46 +79,24 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Función para evaluar la expresión sin dependencias externas
+    // Función para evaluar la expresión
     private fun evaluateExpression(expression: String): Double {
-        val operands = mutableListOf<Double>()
-        val operators = mutableListOf<Char>()
+        val operands = expression.split("(?=[+\\-*/])|(?<=[+\\-*/])".toRegex()).toMutableList()
+        var result = operands[0].toDouble()
 
-        var currentNum = ""
+        for (i in 1 until operands.size step 2) {
+            val operator = operands[i]
+            val number = operands[i + 1].toDouble()
 
-        for (char in expression) {
-            when {
-                char.isDigit() || char == '.' -> currentNum += char  // Construimos números
-                else -> {
-                    if (currentNum.isNotEmpty()) {
-                        operands.add(currentNum.toDouble())  // Añadimos el número al arreglo
-                        currentNum = ""
-                    }
-                    operators.add(char)  // Añadimos el operador
-                }
+            result = when (operator) {
+                "+" -> result + number
+                "-" -> result - number
+                "*" -> result * number
+                "/" -> result / number
+                else -> result
             }
         }
-        if (currentNum.isNotEmpty()) {
-            operands.add(currentNum.toDouble())
-        }
 
-        // Evaluamos la expresión según el orden de operaciones
-        while (operators.isNotEmpty()) {
-            val index = operators.indexOfFirst { it in arrayOf('*', '/', '+', '-') }
-            val op = operators.removeAt(index)
-            val num1 = operands.removeAt(index)
-            val num2 = operands.removeAt(index)
-
-            val result = when (op) {
-                '+' -> num1 + num2
-                '-' -> num1 - num2
-                '*' -> num1 * num2
-                '/' -> num1 / num2
-                else -> 0.0
-            }
-            operands.add(index, result)  // Insertamos el resultado en el lugar correcto
-        }
-
-        return operands.firstOrNull() ?: 0.0
+        return result
     }
 }
